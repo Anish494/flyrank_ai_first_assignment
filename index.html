@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Content Archetypes: A Behavioral Clustering Approach to Search Content Triage</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600;8..60,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F6F5F0;
+    --paper-raised:#EFEDE5;
+    --ink:#1C211D;
+    --muted:#5C6259;
+    --line:#D9D5C9;
+    --blue:#204C82;
+    --blue-tint:#E7EDF5;
+    --green:#3E6B47;
+    --green-tint:#EAF1EA;
+    --amber:#9B6E1F;
+    --amber-tint:#F5EEDD;
+    --rust:#93401F;
+    --rust-tint:#F3E7DD;
+    --grey:#767A72;
+    --grey-tint:#EAE9E4;
+    --max:760px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'IBM Plex Sans',system-ui,-apple-system,sans-serif;
+    font-size:16px;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:var(--max); margin:0 auto; padding:0 24px;}
+  h1,h2,h3{font-family:'Source Serif 4',Georgia,serif; font-weight:600; color:var(--ink); line-height:1.2;}
+  h1{font-size:2.6rem; font-weight:700; margin:0 0 18px;}
+  h2{font-size:1.6rem; margin:0 0 6px;}
+  h3{font-size:1.15rem; margin:0 0 8px;}
+  p{margin:0 0 16px;}
+  a{color:var(--blue);}
+  code, .mono{font-family:'IBM Plex Mono',monospace; font-size:0.92em;}
+
+  /* ---- top mast ---- */
+  .mast{padding:64px 0 40px; border-bottom:1px solid var(--line);}
+  .mast .kicker{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:0.82rem;
+    color:var(--muted);
+    margin:0 0 14px;
+    letter-spacing:0.01em;
+  }
+  .mast .byline{
+    display:flex; gap:18px; flex-wrap:wrap;
+    font-size:0.92rem; color:var(--muted); margin-top:18px;
+  }
+  .mast .byline b{color:var(--ink); font-weight:600;}
+
+  /* ---- hero spectrum bar: the archetype distribution as the first visual ---- */
+  .spectrum{margin:34px 0 6px;}
+  .spectrum-bar{
+    display:flex; width:100%; height:46px; border-radius:3px; overflow:hidden;
+    border:1px solid var(--line);
+  }
+  .spectrum-seg{height:100%; display:flex; align-items:center; justify-content:center;
+    font-family:'IBM Plex Mono',monospace; font-size:0.72rem; color:#fff; white-space:nowrap; overflow:hidden;}
+  .spectrum-legend{display:flex; flex-wrap:wrap; gap:18px; margin-top:12px; font-size:0.82rem; color:var(--muted);}
+  .spectrum-legend span{display:inline-flex; align-items:center; gap:7px;}
+  .swatch{width:11px; height:11px; border-radius:2px; display:inline-block;}
+
+  /* ---- section rhythm ---- */
+  section{padding:56px 0; border-bottom:1px solid var(--line);}
+  section:last-of-type{border-bottom:none;}
+  .section-num{
+    font-family:'IBM Plex Mono',monospace; font-size:0.8rem; color:var(--muted);
+    margin:0 0 8px;
+  }
+
+  /* ---- abstract card ---- */
+  .abstract{
+    background:var(--paper-raised); border:1px solid var(--line); border-radius:4px;
+    padding:26px 28px; margin-top:28px;
+  }
+  .abstract h3{font-size:0.85rem; text-transform:none; margin:0 0 10px; color:var(--muted); font-family:'IBM Plex Sans',sans-serif; font-weight:600;}
+  .abstract p{margin:0; font-size:1.02rem;}
+
+  /* ---- stat row ---- */
+  .stats{display:flex; gap:28px; flex-wrap:wrap; margin:26px 0;}
+  .stat{flex:1; min-width:130px;}
+  .stat .n{font-family:'IBM Plex Mono',monospace; font-size:1.7rem; font-weight:500; color:var(--ink); display:block;}
+  .stat .l{font-size:0.85rem; color:var(--muted);}
+
+  /* ---- tables ---- */
+  table{width:100%; border-collapse:collapse; margin:20px 0; font-size:0.92rem;}
+  th,td{text-align:left; padding:9px 12px; border-bottom:1px solid var(--line);}
+  th{font-weight:600; color:var(--muted); font-size:0.8rem; font-family:'IBM Plex Mono',monospace; font-weight:400;}
+  td.num, th.num{font-family:'IBM Plex Mono',monospace; text-align:right;}
+
+  /* ---- callouts ---- */
+  .note{
+    border-left:3px solid var(--blue); background:var(--blue-tint);
+    padding:14px 18px; margin:20px 0; border-radius:0 4px 4px 0; font-size:0.94rem;
+  }
+  .caution{border-left-color:var(--rust); background:var(--rust-tint);}
+  .limit{border-left-color:var(--amber); background:var(--amber-tint);}
+
+  /* ---- archetype rows (not identical SaaS cards -- proportional bars) ---- */
+  .archetype{
+    display:grid; grid-template-columns:150px 1fr; gap:20px; align-items:start;
+    padding:18px 0; border-bottom:1px solid var(--line);
+  }
+  .archetype:last-child{border-bottom:none;}
+  .archetype-name{font-family:'Source Serif 4',serif; font-weight:600; font-size:1.05rem;}
+  .archetype-bar-track{height:8px; background:var(--paper-raised); border-radius:4px; margin:8px 0 10px; overflow:hidden;}
+  .archetype-bar-fill{height:100%; border-radius:4px;}
+  .archetype-meta{display:flex; gap:16px; flex-wrap:wrap; font-size:0.82rem; color:var(--muted); font-family:'IBM Plex Mono',monospace;}
+  .action-tag{
+    display:inline-block; font-size:0.78rem; font-family:'IBM Plex Mono',monospace;
+    padding:2px 8px; border-radius:3px; margin-top:6px;
+  }
+
+  /* ---- k-selection chart ---- */
+  .kchart{margin:24px 0 8px;}
+  .kchart svg{width:100%; height:auto; display:block;}
+
+  /* ---- no-go list ---- */
+  .nogo li{margin-bottom:10px;}
+  .nogo{padding-left:20px;}
+
+  /* ---- footer / repro links ---- */
+  .repro-list a{display:block; padding:8px 0; border-bottom:1px solid var(--line); text-decoration:none;}
+  .repro-list a:hover{color:var(--ink);}
+  footer{padding:40px 0 60px; color:var(--muted); font-size:0.88rem;}
+  footer a{color:var(--muted);}
+
+  @media (max-width:600px){
+    h1{font-size:2rem;}
+    .archetype{grid-template-columns:1fr;}
+  }
+
+  :root:not([data-theme="light"]) { }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#181A17; --paper-raised:#212420; --ink:#EAE8E1; --muted:#9A9C93; --line:#33362F;
+      --blue-tint:#1B2534; --green-tint:#1B241D; --amber-tint:#26200F; --rust-tint:#291710; --grey-tint:#232520;
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#181A17; --paper-raised:#212420; --ink:#EAE8E1; --muted:#9A9C93; --line:#33362F;
+    --blue-tint:#1B2534; --green-tint:#1B241D; --amber-tint:#26200F; --rust-tint:#291710; --grey-tint:#232520;
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap mast">
+  <p class="kicker">DATA REPORT · FLYRANK ML INTERNSHIP CAPSTONE</p>
+  <h1>Content Archetypes: A Behavioral Clustering Approach to Search Content Triage</h1>
+  <p style="font-size:1.05rem; color:var(--muted); margin-top:4px;">
+    Grouping 28,311 pages into five behavioral archetypes to help a content team decide
+    what to review first — built and validated on FlyRank's anonymized search performance data.
+  </p>
+  <div class="byline">
+    <span>By <b>Anish</b></span>
+    <span>Machine Learning Track — FlyRank AI Internship</span>
+    <span>2026</span>
+  </div>
+
+  <div class="spectrum">
+    <div class="spectrum-bar">
+      <div class="spectrum-seg" style="width:1.3%; background:#204C82;" title="Champions 1.3%"></div>
+      <div class="spectrum-seg" style="width:13.8%; background:#3E6B47;" title="Rising Stars 13.8%"></div>
+      <div class="spectrum-seg" style="width:32.7%; background:#9B6E1F;" title="Thin Visible Pages 32.7%"></div>
+      <div class="spectrum-seg" style="width:41.4%; background:#93401F;" title="Underperforming Long-Form 41.4%"></div>
+      <div class="spectrum-seg" style="width:10.8%; background:#767A72;" title="Buried &amp; Weak 10.8%"></div>
+    </div>
+    <div class="spectrum-legend">
+      <span><span class="swatch" style="background:#204C82;"></span>Champions — 376</span>
+      <span><span class="swatch" style="background:#3E6B47;"></span>Rising Stars — 3,911</span>
+      <span><span class="swatch" style="background:#9B6E1F;"></span>Thin Visible Pages — 9,262</span>
+      <span><span class="swatch" style="background:#93401F;"></span>Underperforming Long-Form — 11,708</span>
+      <span><span class="swatch" style="background:#767A72;"></span>Buried &amp; Weak — 3,054</span>
+    </div>
+  </div>
+</div>
+
+<!-- ABSTRACT -->
+<section class="wrap">
+  <p class="section-num">Abstract</p>
+  <div class="abstract">
+    <h3>Five-sentence summary</h3>
+    <p>
+      This project asks whether FlyRank's search content inventory naturally separates into a small number of
+      behavioral archetypes, rather than requiring one hand-written scoring rule for every page. Using five
+      observable signals — impressions, average position, click-through rate, word count, and content age — I
+      fit a K-Means model (K=5, chosen by silhouette score) on 28,311 pages from the starter content-refresh
+      dataset. The resulting archetypes range from a small, high-traffic "Champions" group (1.3% of pages) to a
+      large "Underperforming Long-Form" group (41.4%), and comparing them against a simple declining-page baseline
+      rule showed the baseline under-flags exactly the weakest-performing archetype. A grouped-by-client validation
+      check confirmed the clustering is broadly stable across unseen clients, though measurably less stable than an
+      earlier random-split check suggested. The result is a ranked, reason-coded content action playbook intended
+      for human-reviewed triage, not automated decision-making.
+    </p>
+  </div>
+</section>
+
+<!-- INTRODUCTION -->
+<section class="wrap">
+  <p class="section-num">1 — Introduction</p>
+  <h2>The problem: one rule can't describe every page</h2>
+  <p>
+    A content team with hundreds of thousands of pages and limited review capacity needs a way to decide what to
+    look at first. The natural first instinct is a hand-written rule — for example, "flag any page that is
+    declining and still gets meaningful traffic." That works, but it treats every flagged page identically, even
+    though a page that's declining because it's stuck on page 5 of search results needs a very different response
+    than a page that's declining because a related page cannibalized its traffic.
+  </p>
+  <p>
+    This project asks a narrower, more tractable question: rather than trying to predict which pages will decline
+    (a future outcome, and a much harder labeling problem), can we describe the <em>current</em> behavioral shape
+    of the content inventory well enough to route different kinds of pages to different actions? That reframes the
+    task from prediction to <strong>description</strong> — from classification to clustering.
+  </p>
+  <div class="note">
+    <strong>Decision this supports:</strong> a content strategist deciding where to spend their next hour of
+    review time, choosing among protect, promote, expand, rewrite, or prune actions across a large page inventory.
+  </div>
+  <p>
+    <strong>Cost of a wrong recommendation:</strong> if a page is routed to the wrong action — say, a page
+    recommended for pruning that actually carries real traffic from an unusual angle — the cost is a wasted or
+    counterproductive editorial decision, not a catastrophic one. This is why every recommendation in this project
+    is framed as decision-support for a human reviewer, never as an automatic action (see Section 6).
+  </p>
+</section>
+
+<!-- DATA -->
+<section class="wrap">
+  <p class="section-num">2 — Data</p>
+  <h2>What this project used, and what it deliberately left out</h2>
+  <p>
+    Two data sources were used at different stages of this project. Early framing and the final clustering model
+    (Sections 4–6) run on the small anonymized starter dataset that ships with the internship repository — a
+    30,000-row sample of content performance metrics. The data contract and leakage-audit exercise (Section 3)
+    were built and verified against the full FlyRank internship warehouse release, to prove the same discipline
+    holds at production scale.
+  </p>
+  <div class="stats">
+    <div class="stat"><span class="n">341K→30K</span><span class="l">full portfolio → starter sample used here</span></div>
+    <div class="stat"><span class="n">78.8M</span><span class="l">warehouse daily fact rows (contract, §3)</span></div>
+    <div class="stat"><span class="n">104</span><span class="l">pseudonymized clients in the warehouse</span></div>
+    <div class="stat"><span class="n">28,311</span><span class="l">pages actually clustered, after cleaning</span></div>
+  </div>
+  <h3>What was excluded, and why</h3>
+  <table>
+    <tr><th>Excluded</th><th>Reason</th></tr>
+    <tr><td>Rows with impossible CTR (&gt;1.0)</td><td>1,326 rows had CTR values up to 29.4 — a data artifact, not a real signal. Excluded from the final model rather than silently averaged in.</td></tr>
+    <tr><td>GA4 engagement features (scroll rate, sessions)</td><td>In a mid-panel warehouse month, only 4.2% of rows had GA4 tracking active — including engagement features would mean the vast majority of pages carry no real signal there.</td></tr>
+    <tr><td>Any FlyRank product decision flags (health_score, priority_score)</td><td>These are the system's own outputs, not observed signals. Using them as inputs would make the model rediscover an existing rule rather than find new structure.</td></tr>
+    <tr><td>Future-window metrics (e.g. next-month impression change)</td><td>Demonstrated directly in a leakage trial: a feature derived from the following month created an artificial 94,000 vs 48,920 "declining vs growing" split that had nothing to do with real behavior at decision time.</td></tr>
+  </table>
+  <p>All client and content identifiers throughout are pseudonymized hashes; no raw client names, domains, URLs, or queries appear anywhere in this project or its outputs.</p>
+</section>
+
+<!-- METHODOLOGY -->
+<section class="wrap">
+  <p class="section-num">3 — Methodology</p>
+  <h2>Framing, features, and how K was chosen</h2>
+  <p>
+    <strong>Task type:</strong> clustering, not classification. There is no historical "correct archetype" label to
+    predict — the archetypes themselves are the thing being discovered. The "target" is the cluster assignment the
+    algorithm produces, which only becomes meaningful once each cluster's contents are inspected and named.
+  </p>
+  <p>
+    <strong>Features (five, each independently justified as knowable at decision time):</strong>
+    impressions (90-day observed traffic), average position (observed ranking), click-through rate (observed
+    engagement), word count (static content property), and content age (computed from creation date). A pairwise
+    correlation check confirmed all five carry largely independent information (correlations between -0.12 and
+    0.16) — none is a redundant restatement of another.
+  </p>
+
+  <h3>Choosing K</h3>
+  <p>
+    K was chosen by comparing silhouette score and inertia (elbow) across K = 2 through 8. Both signals pointed to
+    the same answer.
+  </p>
+  <div class="kchart">
+    <svg viewBox="0 0 680 220" xmlns="http://www.w3.org/2000/svg">
+      <!-- axes -->
+      <line x1="50" y1="10" x2="50" y2="180" stroke="#D9D5C9" stroke-width="1"/>
+      <line x1="50" y1="180" x2="650" y2="180" stroke="#D9D5C9" stroke-width="1"/>
+      <!-- silhouette points: k2..8 -> 0.349,0.358,0.369,0.384,0.367,0.370,0.367 -->
+      <!-- scale: x = 50 + (k-2)*100 ; y = 180 - (val-0.34)*3000 -->
+      <polyline fill="none" stroke="#204C82" stroke-width="2.5"
+        points="50,167 150,140 250,107 350,60 450,111 550,100 650,111" />
+      <circle cx="350" cy="60" r="6" fill="#204C82"/>
+      <circle cx="50" cy="167" r="3.5" fill="#204C82"/>
+      <circle cx="150" cy="140" r="3.5" fill="#204C82"/>
+      <circle cx="250" cy="107" r="3.5" fill="#204C82"/>
+      <circle cx="450" cy="111" r="3.5" fill="#204C82"/>
+      <circle cx="550" cy="100" r="3.5" fill="#204C82"/>
+      <circle cx="650" cy="111" r="3.5" fill="#204C82"/>
+      <text x="350" y="42" text-anchor="middle" font-family="IBM Plex Mono" font-size="12" fill="#204C82">K=5 · 0.384</text>
+      <text x="50" y="198" font-family="IBM Plex Mono" font-size="11" fill="#5C6259">2</text>
+      <text x="150" y="198" font-family="IBM Plex Mono" font-size="11" fill="#5C6259">3</text>
+      <text x="250" y="198" font-family="IBM Plex Mono" font-size="11" fill="#5C6259">4</text>
+      <text x="350" y="198" font-family="IBM Plex Mono" font-size="11" fill="#5C6259">5</text>
+      <text x="450" y="198" font-family="IBM Plex Mono" font-size="11" fill="#5C6259">6</text>
+      <text x="550" y="198" font-family="IBM Plex Mono" font-size="11" fill="#5C6259">7</text>
+      <text x="650" y="198" font-family="IBM Plex Mono" font-size="11" fill="#5C6259">8</text>
+      <text x="350" y="215" text-anchor="middle" font-family="IBM Plex Sans" font-size="12" fill="#5C6259">Number of clusters (K)</text>
+    </svg>
+  </div>
+  <p style="font-size:0.88rem; color:var(--muted);">Silhouette score by K. K=5 is a clear local peak (0.384), and inertia's rate of improvement visibly slows after this point.</p>
+
+  <h3>Baseline</h3>
+  <p>
+    Before modeling, a simple hand-written rule was built as the thing any clustering approach needs to justify
+    itself against: flag a page when it is both currently declining and still earning meaningful traffic
+    (<code>impressions_90d ≥ 500</code>). Two candidate signals were checked before finalizing this rule — content
+    staleness came back <strong>OPPOSITE</strong> of the expected direction (non-stale pages declined more often
+    than stale ones in this sample), so the rule deliberately avoids leaning on staleness at all.
+  </p>
+
+  <h3>Validation design</h3>
+  <p>
+    Clustering has no train/test accuracy in the classification sense, so stability was checked instead: the same
+    model was re-fit on two independently sampled halves of the data, first with a plain random row split, then
+    with a <strong>grouped-by-client split</strong> (no client's pages allowed to appear in both halves). Results
+    are reported honestly in Section 4.
+  </p>
+  <div class="note">
+    <strong>Leakage audit performed:</strong> every feature was checked against a standard leakage checklist
+    (calculated only from pre-decision information; not a rebuilt product flag; not redundant with another
+    feature). The one place leakage was found was methodological, not feature-based — see the validation
+    comparison below.
+  </div>
+</section>
+
+<!-- RESULTS -->
+<section class="wrap">
+  <p class="section-num">4 — Results</p>
+  <h2>Five archetypes, and where the baseline missed something</h2>
+
+  <h3>The archetypes</h3>
+  <div class="archetype">
+    <div>
+      <div class="archetype-name">Champions</div>
+      <div class="action-tag" style="background:var(--blue-tint); color:var(--blue);">protect</div>
+    </div>
+    <div>
+      <div class="archetype-bar-track"><div class="archetype-bar-fill" style="width:1.3%; background:#204C82;"></div></div>
+      <div class="archetype-meta">
+        <span>n = 376 (1.3%)</span><span>impressions ≈ 115.5K</span><span>position ≈ 10.9</span><span>CTR ≈ 0.3</span>
+      </div>
+    </div>
+  </div>
+  <div class="archetype">
+    <div>
+      <div class="archetype-name">Rising Stars</div>
+      <div class="action-tag" style="background:var(--green-tint); color:var(--green);">support / promote</div>
+    </div>
+    <div>
+      <div class="archetype-bar-track"><div class="archetype-bar-fill" style="width:13.8%; background:#3E6B47;"></div></div>
+      <div class="archetype-meta">
+        <span>n = 3,911 (13.8%)</span><span>impressions ≈ 6.9K</span><span>position ≈ 11.4</span><span>CTR ≈ 0.6 (highest)</span>
+      </div>
+    </div>
+  </div>
+  <div class="archetype">
+    <div>
+      <div class="archetype-name">Thin Visible Pages</div>
+      <div class="action-tag" style="background:var(--amber-tint); color:var(--amber);">expand</div>
+    </div>
+    <div>
+      <div class="archetype-bar-track"><div class="archetype-bar-fill" style="width:32.7%; background:#9B6E1F;"></div></div>
+      <div class="archetype-meta">
+        <span>n = 9,262 (32.7%)</span><span>impressions ≈ 3.7K</span><span>position ≈ 10.8 (good)</span><span>words ≈ 796 (short)</span>
+      </div>
+    </div>
+  </div>
+  <div class="archetype">
+    <div>
+      <div class="archetype-name">Underperforming Long-Form</div>
+      <div class="action-tag" style="background:var(--rust-tint); color:var(--rust);">rewrite / improve</div>
+    </div>
+    <div>
+      <div class="archetype-bar-track"><div class="archetype-bar-fill" style="width:41.4%; background:#93401F;"></div></div>
+      <div class="archetype-meta">
+        <span>n = 11,708 (41.4%, largest group)</span><span>impressions ≈ 3.6K</span><span>position ≈ 14.7</span><span>words ≈ 3.6K (long)</span>
+      </div>
+    </div>
+  </div>
+  <div class="archetype">
+    <div>
+      <div class="archetype-name">Buried &amp; Weak</div>
+      <div class="action-tag" style="background:var(--grey-tint); color:var(--grey);">prune or monitor</div>
+    </div>
+    <div>
+      <div class="archetype-bar-track"><div class="archetype-bar-fill" style="width:10.8%; background:#767A72;"></div></div>
+      <div class="archetype-meta">
+        <span>n = 3,054 (10.8%)</span><span>impressions ≈ 1.0K</span><span>position ≈ 49.7 (page 5+)</span><span>CTR ≈ 0.0</span>
+      </div>
+    </div>
+  </div>
+
+  <h3>Where the baseline rule missed something</h3>
+  <p>
+    Applying the baseline rule (declining + ≥500 impressions) across an earlier clustering pass showed the flag
+    rate varied enormously by archetype — from 0% to 41.1%. Most notably, the archetype with the objectively worst
+    position and CTR had the <em>lowest</em> real flag rate (16.0%), likely because the baseline's impression floor
+    filters out low-traffic pages before the decline check ever runs. In other words: the baseline may be
+    systematically under-reviewing exactly the pages that need the most attention, simply because they are also
+    the lowest-volume ones. Clustering surfaced this gap directly; the single binary baseline rule could not have
+    revealed it on its own.
+  </p>
+
+  <h3>Validation: honest, not perfect, stability</h3>
+  <table>
+    <tr><th></th><th class="num">Half A silhouette</th><th class="num">Half B silhouette</th><th class="num">Gap</th></tr>
+    <tr><td>Random row split</td><td class="num">0.385</td><td class="num">0.380</td><td class="num">0.005</td></tr>
+    <tr><td>Grouped by client (0 client overlap)</td><td class="num">0.343</td><td class="num">0.377</td><td class="num">0.034</td></tr>
+  </table>
+  <div class="note caution">
+    <strong>What this means:</strong> the random split made the clustering look almost perfectly stable — a gap
+    of just 0.005. Once genuinely unseen clients were forced into separate halves, the real gap was roughly 7×
+    larger. The clustering is still meaningfully stable (both grouped scores sit well above zero, close to the
+    full-data silhouette of 0.384), but the random-split check overstated how clean that stability was. This
+    mirrors a finding from the paper this project was benchmarked against (see Section 5) — random splits across
+    a multi-client dataset can look better than they truly are.
+  </div>
+</section>
+
+<!-- LIMITATIONS -->
+<section class="wrap">
+  <p class="section-num">5 — Limitations &amp; Honest Framing</p>
+  <h2>What this project can and cannot say</h2>
+  <p><strong>This project can say:</strong> that this content inventory, on this snapshot, separates into five
+  behaviorally distinct, measurably stable archetypes based on observable signals — and that a simple baseline
+  rule treats those archetypes very unevenly. These are observed, directional, decision-support findings.</p>
+  <p><strong>This project cannot say:</strong> that any recommended action will cause a page's performance to
+  improve; that cluster membership predicts future outcomes; that these archetypes are Google-ranking-algorithm
+  categories; or that this clustering is stable across time (only cross-client stability was tested).</p>
+  <ul>
+    <li><strong>Single snapshot, no seasonality test.</strong> Archetype membership for a given page is not guaranteed to hold in a different month.</li>
+    <li><strong>Missing word-count data.</strong> Rows with missing word counts were treated as zero during clustering, which may have nudged a small number of pages toward the wrong archetype.</li>
+    <li><strong>Within-archetype outliers matter.</strong> A handful of "Buried &amp; Weak" pages carry 30,000–59,000+ impressions despite deep positions — far above that archetype's average. Archetype membership alone understates their priority; a within-archetype ranking by traffic is needed on top of it.</li>
+    <li><strong>No causal validation.</strong> This is an observational, descriptive analysis. Testing whether a recommended edit actually improves outcomes would require a controlled before/after experiment, outside this project's scope.</li>
+  </ul>
+  <p>Benchmarked against FlyRank's own March 2026 portfolio research paper (341,701 content pieces, 57 brands),
+  this project's approach mirrors that paper's own explicit caution around its exploratory K-Means appendix: both
+  works treat cluster archetypes as descriptive lenses, not fixed operational personas, and both flag that
+  validation design (grouped vs. random splits) materially changes how confident a result should be treated.</p>
+</section>
+
+<!-- RANKED RECOMMENDATIONS -->
+<section class="wrap">
+  <p class="section-num">6 — Ranked Recommendations</p>
+  <h2>The action playbook</h2>
+  <p>Recommended actions are ranked within each archetype by impression volume — the archetype sets the general
+  action; the ranking inside it decides who gets reviewed first.</p>
+  <table>
+    <tr><th>Archetype</th><th>Action</th><th>Reason code</th></tr>
+    <tr><td>Champions</td><td>Protect</td><td class="mono">champion_protect</td></tr>
+    <tr><td>Rising Stars</td><td>Support / promote</td><td class="mono">rising_star_promote</td></tr>
+    <tr><td>Thin Visible Pages</td><td>Expand</td><td class="mono">thin_visible_expand</td></tr>
+    <tr><td>Underperforming Long-Form</td><td>Rewrite / improve</td><td class="mono">long_form_underperform_rewrite</td></tr>
+    <tr><td>Buried &amp; Weak</td><td>Prune or monitor</td><td class="mono">buried_weak_prune_or_monitor</td></tr>
+  </table>
+
+  <h3>Human review is required before any action</h3>
+  <p>For every recommended action, a reviewer should confirm the archetype label actually matches the page's
+  real content and business context before acting.</p>
+
+  <h3>What should never be automated</h3>
+  <ol class="nogo">
+    <li>Never auto-delete or auto-unpublish "prune" pages — some carry real value (backlinks, legal content) or, as shown in Section 5, unusually high traffic despite a weak position.</li>
+    <li>Never auto-rewrite content using AI without human review of the output.</li>
+    <li>Never treat "protect" as a reason to stop monitoring — champions can decline too.</li>
+    <li>Never merge pages automatically based on archetype similarity alone — behavioral similarity is not topical similarity.</li>
+    <li>Never use this ranking as a performance evaluation of the person who created the page.</li>
+  </ol>
+
+  <h3>Monitoring &amp; retrain triggers</h3>
+  <p>This playbook should be re-run when: any archetype's portfolio share shifts by more than ~10 percentage
+  points; the rate of data-quality issues (impossible CTR, missing word count) rises above what was seen in this
+  run; at least every 90 days regardless, since this is a single-snapshot analysis; or if a future grouped-split
+  stability check shows the client-generalization gap widening beyond what was found here.</p>
+</section>
+
+<!-- REPRODUCIBILITY -->
+<section class="wrap">
+  <p class="section-num">7 — Reproducibility</p>
+  <h2>Every step of this project is a runnable notebook</h2>
+  <p>All notebooks live in the repository below, under <code>work/notebooks/</code>, and can be re-run end to end
+  on the public starter dataset.</p>
+  <div class="repro-list">
+    <a href="https://github.com/Anish494/flyrank_ai_first_assignment" target="_blank">→ Full repository</a>
+    <a href="https://github.com/Anish494/flyrank_ai_first_assignment/blob/main/work/notebooks/w01_research_question.ipynb" target="_blank">w01 — Research question &amp; lane choice</a>
+    <a href="https://github.com/Anish494/flyrank_ai_first_assignment/blob/main/work/notebooks/w02_ml_task_framing.ipynb" target="_blank">w02 — Framing as an ML task</a>
+    <a href="https://github.com/Anish494/flyrank_ai_first_assignment/blob/main/work/notebooks/w03_data_contract.ipynb" target="_blank">w03 — Data contract (full warehouse)</a>
+    <a href="https://github.com/Anish494/flyrank_ai_first_assignment/blob/main/work/notebooks/w04_baseline_score.ipynb" target="_blank">w04 — Baseline score &amp; signal checks</a>
+    <a href="https://github.com/Anish494/flyrank_ai_first_assignment/blob/main/work/notebooks/w05_model.ipynb" target="_blank">w05 — K-Means model &amp; stability check</a>
+    <a href="https://github.com/Anish494/flyrank_ai_first_assignment/blob/main/work/notebooks/w06_validation_audit.ipynb" target="_blank">w06 — Grouped-split validation audit</a>
+    <a href="https://github.com/Anish494/flyrank_ai_first_assignment/blob/main/work/notebooks/w07_action_playbook.ipynb" target="_blank">w07 — Final action playbook &amp; exports</a>
+  </div>
+</section>
+
+<footer class="wrap">
+  <p><strong>Acknowledgments &amp; data credit.</strong> Built on the FlyRank ML Internship dataset —
+  <a href="https://flyrank.ai" target="_blank">flyrank.ai</a>. Thanks to the FlyRank team for making a real,
+  anonymized production search dataset available for this work.</p>
+  <p>All client and content identifiers are pseudonymized. No client names, domains, URLs, or private queries appear anywhere in this project.</p>
+</footer>
+
+</body>
+</html>
