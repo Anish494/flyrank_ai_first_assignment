@@ -1,0 +1,64 @@
+{
+  "n_rows_clustered": 28311,
+  "n_impossible_ctr_excluded": 1326,
+  "k_chosen": 5,
+  "cluster_centers": {
+    "0": {
+      "impressions_90d": 6922.9,
+      "avg_position": 11.4,
+      "ctr": 0.6,
+      "word_count": 2897.7,
+      "content_age_days": 200.2
+    },
+    "1": {
+      "impressions_90d": 3689.6,
+      "avg_position": 10.8,
+      "ctr": 0.1,
+      "word_count": 796.2,
+      "content_age_days": 371.6
+    },
+    "2": {
+      "impressions_90d": 3600.9,
+      "avg_position": 14.7,
+      "ctr": 0.1,
+      "word_count": 3628.4,
+      "content_age_days": 161.6
+    },
+    "3": {
+      "impressions_90d": 115536.3,
+      "avg_position": 10.9,
+      "ctr": 0.3,
+      "word_count": 2690.9,
+      "content_age_days": 264.7
+    },
+    "4": {
+      "impressions_90d": 1045.1,
+      "avg_position": 49.7,
+      "ctr": 0.0,
+      "word_count": 1054.3,
+      "content_age_days": 347.9
+    }
+  },
+  "archetype_map": {
+    "3": "Champions",
+    "0": "Rising Stars",
+    "1": "Thin Visible Pages",
+    "2": "Underperforming Long-Form",
+    "4": "Buried & Weak"
+  },
+  "archetype_counts": {
+    "Underperforming Long-Form": 11708,
+    "Thin Visible Pages": 9262,
+    "Rising Stars": 3911,
+    "Buried & Weak": 3054,
+    "Champions": 376
+  },
+  "silhouette_before_random_split": {
+    "half_a": 0.385,
+    "half_b": 0.38
+  },
+  "silhouette_after_grouped_split": {
+    "half_a": 0.343,
+    "half_b": 0.377
+  }
+}
